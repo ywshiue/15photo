@@ -1,0 +1,697 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>IG 調色 App · Deep Blue</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;1,400&family=DM+Mono:wght@300;400&display=swap');
+
+:root {
+  --bg: #13151a;
+  --surface: #1c1f26;
+  --surface2: #242830;
+  --border: #2e3340;
+  --border-light: #3d4455;
+  --blue: #4a7fa5;
+  --blue-light: #7aaecb;
+  --blue-dim: #2a4d66;
+  --text: #dde3ea;
+  --text-2: #8a96a4;
+  --text-3: #50596a;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'DM Mono', monospace;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 24px 14px 80px;
+}
+
+/* HEADER */
+.header {
+  text-align: center;
+  margin-bottom: 24px;
+}
+.header-tag {
+  font-size: 9px;
+  letter-spacing: 4px;
+  text-transform: uppercase;
+  color: var(--blue);
+  margin-bottom: 10px;
+}
+.header h1 {
+  font-family: 'Playfair Display', serif;
+  font-size: clamp(24px, 4vw, 34px);
+  font-weight: 400;
+  letter-spacing: 0.02em;
+  color: var(--text);
+}
+.header h1 em { color: var(--blue-light); font-style: italic; }
+
+/* MAIN LAYOUT - mobile first, single column */
+.app {
+  width: 100%;
+  max-width: 500px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+/* On wide screens, go 2-col */
+@media (min-width: 700px) {
+  .app {
+    max-width: 860px;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+/* PANEL */
+.panel {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.panel-header {
+  padding: 14px 20px;
+  border-bottom: 1px solid var(--border);
+  font-size: 9px;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: var(--text-3);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+/* UPLOAD ZONE */
+.upload-zone {
+  margin: 20px;
+  border: 1px dashed var(--border-light);
+  border-radius: 8px;
+  height: 200px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  cursor: pointer;
+  transition: border-color 0.2s, background 0.2s;
+  position: relative;
+  overflow: hidden;
+}
+.upload-zone:hover {
+  border-color: var(--blue);
+  background: rgba(74,127,165,0.04);
+}
+.upload-zone.has-image {
+  border-style: solid;
+  border-color: var(--blue-dim);
+}
+.upload-icon { font-size: 28px; opacity: 0.5; }
+.upload-text { font-size: 11px; color: var(--text-2); text-align: center; line-height: 1.6; }
+.upload-text span { color: var(--blue-light); }
+#file-input { display: none; }
+
+.canvas-wrap {
+  margin: 20px;
+  border-radius: 8px;
+  overflow: hidden;
+  background: #0a0c10;
+  display: none;
+  position: relative;
+}
+.canvas-wrap.visible { display: block; }
+canvas {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
+/* PRESET SELECTOR */
+.presets {
+  padding: 16px 20px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+.preset-btn {
+  padding: 12px 14px;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  cursor: pointer;
+  text-align: left;
+  transition: border-color 0.2s, background 0.2s;
+  min-height: 56px;
+}
+.preset-btn:hover { border-color: var(--blue-dim); }
+.preset-btn.active {
+  border-color: var(--blue);
+  background: rgba(74,127,165,0.08);
+}
+.preset-name {
+  font-size: 13px;
+  color: var(--text);
+  margin-bottom: 4px;
+  font-family: 'Playfair Display', serif;
+}
+.preset-desc {
+  font-size: 10px;
+  color: var(--text-3);
+  letter-spacing: 0.5px;
+}
+
+/* SLIDERS */
+.sliders {
+  padding: 16px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.slider-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 36px;
+}
+.slider-label {
+  width: 52px;
+  font-size: 11px;
+  color: var(--text-2);
+  letter-spacing: 1px;
+  flex-shrink: 0;
+}
+.slider-input {
+  flex: 1;
+  -webkit-appearance: none;
+  appearance: none;
+  height: 3px;
+  background: var(--border-light);
+  border-radius: 2px;
+  outline: none;
+  cursor: pointer;
+  min-width: 0;
+}
+.slider-input::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: var(--blue);
+  cursor: pointer;
+  border: 3px solid var(--bg);
+  box-shadow: 0 0 0 1px var(--blue);
+}
+.slider-input::-moz-range-thumb {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: var(--blue);
+  cursor: pointer;
+  border: 3px solid var(--bg);
+}
+.slider-val {
+  width: 32px;
+  font-size: 10px;
+  color: var(--blue-light);
+  text-align: right;
+  flex-shrink: 0;
+}
+
+/* DOWNLOAD BUTTON */
+.btn-download {
+  display: block;
+  width: calc(100% - 40px);
+  margin: 0 20px 20px;
+  padding: 16px;
+  background: var(--blue);
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  font-family: 'DM Mono', monospace;
+  font-size: 12px;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: background 0.2s, transform 0.1s;
+}
+.btn-download:hover { background: var(--blue-light); color: var(--bg); }
+.btn-download:active { transform: scale(0.98); }
+.btn-download:disabled {
+  background: var(--surface2);
+  color: var(--text-3);
+  cursor: not-allowed;
+}
+
+/* BEFORE/AFTER TOGGLE */
+.toggle-wrap {
+  display: flex;
+  gap: 0;
+  margin: 16px 20px 0;
+}
+.toggle-btn {
+  flex: 1;
+  padding: 12px 8px;
+  font-family: 'DM Mono', monospace;
+  font-size: 11px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  cursor: pointer;
+  border: 1px solid var(--border);
+  background: var(--surface2);
+  color: var(--text-3);
+  transition: all 0.2s;
+  min-height: 44px;
+}
+.toggle-btn:first-child { border-radius: 4px 0 0 4px; }
+.toggle-btn:last-child { border-radius: 0 4px 4px 0; border-left: none; }
+.toggle-btn.active { background: var(--surface); color: var(--blue-light); border-color: var(--blue-dim); }
+
+/* STATUS */
+.status-bar {
+  padding: 10px 20px;
+  font-size: 9px;
+  color: var(--text-3);
+  letter-spacing: 1px;
+  border-top: 1px solid var(--border);
+  display: flex;
+  justify-content: space-between;
+}
+.status-dot {
+  display: inline-block;
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  background: var(--text-3);
+  margin-right: 6px;
+  vertical-align: middle;
+}
+.status-dot.active { background: var(--blue); box-shadow: 0 0 6px var(--blue); }
+
+/* FULL WIDTH BOTTOM PANEL */
+.full-panel {
+  grid-column: 1 / -1;
+}
+
+/* CHANGE / REMOVE BUTTONS */
+.img-actions {
+  display: none;
+  gap: 8px;
+  margin: 0 20px 12px;
+}
+.img-actions.visible { display: flex; }
+
+.btn-img-action {
+  flex: 1;
+  padding: 12px 10px;
+  font-family: 'DM Mono', monospace;
+  font-size: 11px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s;
+  border: 1px solid var(--border);
+  min-height: 44px;
+}
+.btn-change {
+  background: var(--surface2);
+  color: var(--blue-light);
+  border-color: var(--blue-dim);
+}
+.btn-change:hover { background: var(--blue-dim); }
+.btn-remove {
+  background: var(--surface2);
+  color: #a06060;
+  border-color: #4a2a2a;
+}
+.btn-remove:hover { background: #2e1a1a; border-color: #7a3a3a; }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-tag">Deep Blue · Gray Tone</div>
+  <h1>IG 照片<em>調色工具</em></h1>
+</div>
+
+<div class="app">
+
+  <!-- LEFT: UPLOAD + PREVIEW -->
+  <div class="panel">
+    <div class="panel-header">
+      <span>預覽</span>
+      <span id="img-size"></span>
+    </div>
+
+    <div class="toggle-wrap">
+      <button class="toggle-btn active" id="btn-after" onclick="showMode('after')">套用後</button>
+      <button class="toggle-btn" id="btn-before" onclick="showMode('before')">原圖</button>
+    </div>
+
+    <div class="upload-zone" id="upload-zone" onclick="document.getElementById('file-input').click()">
+      <div class="upload-icon">🌊</div>
+      <div class="upload-text">點擊上傳照片<br><span>JPG / PNG / WEBP</span></div>
+      <input type="file" id="file-input" accept="image/*">
+    </div>
+
+    <div class="canvas-wrap" id="canvas-wrap">
+      <canvas id="canvas"></canvas>
+    </div>
+
+    <div class="img-actions" id="img-actions">
+      <button class="btn-img-action btn-change" onclick="document.getElementById('file-input').click()">↺ 更換照片</button>
+      <button class="btn-img-action btn-remove" onclick="removeImage()">✕ 移除</button>
+    </div>
+
+    <div class="status-bar">
+      <span><span class="status-dot" id="status-dot"></span><span id="status-text">等待上傳</span></span>
+      <span id="preset-label">—</span>
+    </div>
+  </div>
+
+  <!-- RIGHT: CONTROLS -->
+  <div class="panel">
+    <div class="panel-header"><span>風格預設</span></div>
+    <div class="presets">
+      <button class="preset-btn active" onclick="applyPreset('ocean')">
+        <div class="preset-name">石青</div>
+        <div class="preset-desc">冷調 · 自然紋理 · 推薦</div>
+      </button>
+      <button class="preset-btn" onclick="applyPreset('steel')">
+        <div class="preset-name">礦霧</div>
+        <div class="preset-desc">偏冷 · 低飽和 · 清透</div>
+      </button>
+      <button class="preset-btn" onclick="applyPreset('shore')">
+        <div class="preset-name">海鹽</div>
+        <div class="preset-desc">明亮 · 藍白感 · 清爽</div>
+      </button>
+      <button class="preset-btn" onclick="applyPreset('abyss')">
+        <div class="preset-name">深礦</div>
+        <div class="preset-desc">強對比 · 釉面突出</div>
+      </button>
+    </div>
+
+    <div class="panel-header" style="margin-top:4px;"><span>手動微調</span></div>
+    <div class="sliders">
+      <div class="slider-row">
+        <span class="slider-label">亮度</span>
+        <input type="range" class="slider-input" id="s-brightness" min="-100" max="100" value="0" oninput="onSlider()">
+        <span class="slider-val" id="v-brightness">0</span>
+      </div>
+      <div class="slider-row">
+        <span class="slider-label">對比</span>
+        <input type="range" class="slider-input" id="s-contrast" min="-100" max="100" value="0" oninput="onSlider()">
+        <span class="slider-val" id="v-contrast">0</span>
+      </div>
+      <div class="slider-row">
+        <span class="slider-label">飽和度</span>
+        <input type="range" class="slider-input" id="s-saturation" min="-100" max="100" value="0" oninput="onSlider()">
+        <span class="slider-val" id="v-saturation">0</span>
+      </div>
+      <div class="slider-row">
+        <span class="slider-label">色溫</span>
+        <input type="range" class="slider-input" id="s-temp" min="-100" max="100" value="0" oninput="onSlider()">
+        <span class="slider-val" id="v-temp">0</span>
+      </div>
+      <div class="slider-row">
+        <span class="slider-label">暗角</span>
+        <input type="range" class="slider-input" id="s-vignette" min="0" max="100" value="0" oninput="onSlider()">
+        <span class="slider-val" id="v-vignette">0</span>
+      </div>
+      <div class="slider-row">
+        <span class="slider-label">藍移</span>
+        <input type="range" class="slider-input" id="s-blue" min="0" max="100" value="0" oninput="onSlider()">
+        <span class="slider-val" id="v-blue">0</span>
+      </div>
+    </div>
+
+    <button class="btn-download" id="btn-dl" onclick="downloadImage()" disabled>↓ 下載調色後的照片</button>
+  </div>
+
+</div>
+
+<!-- Hidden original canvas -->
+<canvas id="canvas-orig" style="display:none"></canvas>
+
+<script>
+const canvas = document.getElementById('canvas');
+const ctx = canvas.getContext('2d');
+const origCanvas = document.getElementById('canvas-orig');
+const origCtx = origCanvas.getContext('2d');
+
+let originalImage = null;
+let showingOriginal = false;
+let currentPreset = 'ocean';
+
+const PRESETS = {
+  ocean:  { brightness: 0,   contrast: 12,  saturation: -10, temp: -18, vignette: 0,  blue: 18 },
+  steel:  { brightness: -5,  contrast: 16,  saturation: -15, temp: -22, vignette: 0,  blue: 12 },
+  shore:  { brightness: 5,   contrast: 8,   saturation: -8,  temp: -14, vignette: 0,  blue: 22 },
+  abyss:  { brightness: -10, contrast: 20,  saturation: -18, temp: -20, vignette: 20, blue: 25 },
+};
+
+function applyPreset(name) {
+  currentPreset = name;
+  const p = PRESETS[name];
+  setSlider('brightness', p.brightness);
+  setSlider('contrast', p.contrast);
+  setSlider('saturation', p.saturation);
+  setSlider('temp', p.temp);
+  setSlider('vignette', p.vignette);
+  setSlider('blue', p.blue);
+
+  document.querySelectorAll('.preset-btn').forEach(b => b.classList.remove('active'));
+  event.currentTarget.classList.add('active');
+  document.getElementById('preset-label').textContent = event.currentTarget.querySelector('.preset-name').textContent;
+
+  if (originalImage) renderImage();
+}
+
+function setSlider(id, val) {
+  const el = document.getElementById('s-' + id);
+  el.value = val;
+  document.getElementById('v-' + id).textContent = val;
+}
+
+function onSlider() {
+  ['brightness','contrast','saturation','temp','vignette','blue'].forEach(id => {
+    document.getElementById('v-' + id).textContent = document.getElementById('s-' + id).value;
+  });
+  if (originalImage) renderImage();
+}
+
+function getParams() {
+  return {
+    brightness: +document.getElementById('s-brightness').value,
+    contrast:   +document.getElementById('s-contrast').value,
+    saturation: +document.getElementById('s-saturation').value,
+    temp:       +document.getElementById('s-temp').value,
+    vignette:   +document.getElementById('s-vignette').value,
+    blue:       +document.getElementById('s-blue').value,
+  };
+}
+
+function renderImage() {
+  if (!originalImage) return;
+  const p = getParams();
+
+  canvas.width = origCanvas.width;
+  canvas.height = origCanvas.height;
+
+  // Draw original
+  ctx.drawImage(origCanvas, 0, 0);
+
+  // Get pixel data
+  const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+  const d = imageData.data;
+
+  const bFactor = p.brightness / 100;
+  const cFactor = (100 + p.contrast) / 100;
+  const sFactor = (100 + p.saturation) / 100;
+  const tempShift = p.temp / 100;
+  const blueShift = p.blue / 100;
+
+  for (let i = 0; i < d.length; i += 4) {
+    let r = d[i], g = d[i+1], b = d[i+2];
+
+    // Brightness
+    r += bFactor * 80; g += bFactor * 80; b += bFactor * 80;
+
+    // Color temperature (cool: reduce red, boost blue)
+    r += tempShift * 40;
+    b -= tempShift * 40;
+
+    // Blue channel boost for deep blue effect
+    b += blueShift * 35;
+    r -= blueShift * 15;
+    g -= blueShift * 8;
+
+    // Contrast (pivot at 128)
+    r = (r - 128) * cFactor + 128;
+    g = (g - 128) * cFactor + 128;
+    b = (b - 128) * cFactor + 128;
+
+    // Saturation
+    const gray = 0.299 * r + 0.587 * g + 0.114 * b;
+    r = gray + (r - gray) * sFactor;
+    g = gray + (g - gray) * sFactor;
+    b = gray + (b - gray) * sFactor;
+
+    d[i]   = Math.min(255, Math.max(0, r));
+    d[i+1] = Math.min(255, Math.max(0, g));
+    d[i+2] = Math.min(255, Math.max(0, b));
+  }
+
+  ctx.putImageData(imageData, 0, 0);
+
+  // Vignette overlay
+  if (p.vignette > 0) {
+    const vStrength = p.vignette / 100;
+    const grad = ctx.createRadialGradient(
+      canvas.width/2, canvas.height/2, canvas.width * 0.3,
+      canvas.width/2, canvas.height/2, canvas.width * 0.85
+    );
+    grad.addColorStop(0, 'rgba(0,0,0,0)');
+    grad.addColorStop(1, `rgba(5,10,18,${vStrength * 0.75})`);
+    ctx.fillStyle = grad;
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+  }
+
+  // Blue tint overlay
+  if (blueShift > 0) {
+    ctx.fillStyle = `rgba(30,60,100,${blueShift * 0.12})`;
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+  }
+}
+
+function showMode(mode) {
+  if (!originalImage) return;
+  showingOriginal = (mode === 'before');
+  document.getElementById('btn-after').classList.toggle('active', mode === 'after');
+  document.getElementById('btn-before').classList.toggle('active', mode === 'before');
+
+  if (showingOriginal) {
+    ctx.drawImage(origCanvas, 0, 0, canvas.width, canvas.height);
+  } else {
+    renderImage();
+  }
+}
+
+// Upload
+document.getElementById('file-input').addEventListener('change', (e) => {
+  const file = e.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = (ev) => {
+    const img = new Image();
+    img.onload = () => {
+      originalImage = img;
+
+      // Constrain size
+      let w = img.width, h = img.height;
+      const MAX = 1200;
+      if (w > MAX) { h = h * MAX / w; w = MAX; }
+      if (h > MAX) { w = w * MAX / h; h = MAX; }
+      w = Math.round(w); h = Math.round(h);
+
+      origCanvas.width = w; origCanvas.height = h;
+      canvas.width = w; canvas.height = h;
+      origCtx.drawImage(img, 0, 0, w, h);
+
+      document.getElementById('upload-zone').style.display = 'none';
+      const wrap = document.getElementById('canvas-wrap');
+      wrap.classList.add('visible');
+      document.getElementById('img-actions').classList.add('visible');
+
+      document.getElementById('img-size').textContent = `${img.width} × ${img.height}`;
+      document.getElementById('status-dot').classList.add('active');
+      document.getElementById('status-text').textContent = '已載入';
+      document.getElementById('btn-dl').disabled = false;
+
+      // Apply default preset
+      applyPreset_silent(currentPreset);
+      renderImage();
+    };
+    img.src = ev.target.result;
+  };
+  reader.readAsDataURL(file);
+});
+
+function applyPreset_silent(name) {
+  const p = PRESETS[name];
+  setSlider('brightness', p.brightness);
+  setSlider('contrast', p.contrast);
+  setSlider('saturation', p.saturation);
+  setSlider('temp', p.temp);
+  setSlider('vignette', p.vignette);
+  setSlider('blue', p.blue);
+  document.getElementById('preset-label').textContent = name.charAt(0).toUpperCase() + name.slice(1);
+}
+
+// Drag and drop
+const zone = document.getElementById('upload-zone');
+zone.addEventListener('dragover', (e) => { e.preventDefault(); zone.style.borderColor = 'var(--blue)'; });
+zone.addEventListener('dragleave', () => { zone.style.borderColor = ''; });
+zone.addEventListener('drop', (e) => {
+  e.preventDefault();
+  zone.style.borderColor = '';
+  const file = e.dataTransfer.files[0];
+  if (file && file.type.startsWith('image/')) {
+    const dt = new DataTransfer();
+    dt.items.add(file);
+    document.getElementById('file-input').files = dt.files;
+    document.getElementById('file-input').dispatchEvent(new Event('change'));
+  }
+});
+
+function removeImage() {
+  originalImage = null;
+  showingOriginal = false;
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  origCtx.clearRect(0, 0, origCanvas.width, origCanvas.height);
+
+  document.getElementById('canvas-wrap').classList.remove('visible');
+  document.getElementById('img-actions').classList.remove('visible');
+  document.getElementById('upload-zone').style.display = '';
+  document.getElementById('img-size').textContent = '';
+  document.getElementById('status-dot').classList.remove('active');
+  document.getElementById('status-text').textContent = '等待上傳';
+  document.getElementById('btn-dl').disabled = true;
+  document.getElementById('file-input').value = '';
+  document.getElementById('btn-after').classList.add('active');
+  document.getElementById('btn-before').classList.remove('active');
+}
+
+function downloadImage() {
+  if (!originalImage) return;
+  // Make sure we render the filtered version
+  if (showingOriginal) renderImage();
+
+  const a = document.createElement('a');
+  a.download = 'ig-deepblue.jpg';
+  a.href = canvas.toDataURL('image/jpeg', 0.92);
+  a.click();
+
+  document.getElementById('status-text').textContent = '已下載！';
+  setTimeout(() => { document.getElementById('status-text').textContent = '就緒'; }, 2000);
+}
+
+// Init preset label
+document.getElementById('preset-label').textContent = '石青';
+applyPreset_silent('ocean');
+</script>
+
+</body>
+</html>
