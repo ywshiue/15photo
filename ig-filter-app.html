@@ -337,6 +337,30 @@ canvas {
   border-color: #4a2a2a;
 }
 .btn-remove:hover { background: #2e1a1a; border-color: #7a3a3a; }
+
+/* SAVE HINT */
+.save-hint {
+  display: none;
+  align-items: center;
+  gap: 12px;
+  margin: 0 20px 12px;
+  padding: 12px 14px;
+  background: rgba(74,127,165,0.08);
+  border: 1px solid var(--blue-dim);
+  border-radius: 8px;
+}
+.save-hint.visible { display: flex; }
+.save-hint-icon { font-size: 20px; flex-shrink: 0; }
+.save-hint-text { font-size: 11px; color: var(--text-2); line-height: 1.7; }
+.save-hint-text span { color: var(--text-3); font-size: 10px; }
+
+/* Make canvas show as img so long-press works on iOS */
+#canvas-img {
+  width: 100%;
+  height: auto;
+  display: block;
+  border-radius: 0;
+}
 </style>
 </head>
 <body>
@@ -367,7 +391,8 @@ canvas {
     </div>
 
     <div class="canvas-wrap" id="canvas-wrap">
-      <canvas id="canvas"></canvas>
+      <canvas id="canvas" style="display:none"></canvas>
+      <img id="canvas-img" alt="調色後預覽" style="display:none;">
     </div>
 
     <div class="img-actions" id="img-actions">
@@ -437,7 +462,11 @@ canvas {
       </div>
     </div>
 
-    <button class="btn-download" id="btn-dl" onclick="downloadImage()" disabled>↓ 下載調色後的照片</button>
+    <div class="save-hint" id="save-hint">
+      <div class="save-hint-icon">👆</div>
+      <div class="save-hint-text">長按上方圖片儲存到相簿<br><span>iPhone: 選「加入照片」｜Android: 選「儲存圖片」</span></div>
+    </div>
+    <button class="btn-download" id="btn-dl" onclick="downloadImage()" disabled>↓ 下載到裝置（備用）</button>
   </div>
 
 </div>
@@ -450,10 +479,15 @@ const canvas = document.getElementById('canvas');
 const ctx = canvas.getContext('2d');
 const origCanvas = document.getElementById('canvas-orig');
 const origCtx = origCanvas.getContext('2d');
+const canvasImg = document.getElementById('canvas-img');
 
 let originalImage = null;
 let showingOriginal = false;
 let currentPreset = 'ocean';
+
+function syncImg() {
+  canvasImg.src = canvas.toDataURL('image/jpeg', 0.92);
+}
 
 const PRESETS = {
   ocean:  { brightness: 0,   contrast: 12,  saturation: -10, temp: -18, vignette: 0,  blue: 18 },
@@ -574,6 +608,7 @@ function renderImage() {
     ctx.fillStyle = `rgba(30,60,100,${blueShift * 0.12})`;
     ctx.fillRect(0, 0, canvas.width, canvas.height);
   }
+  syncImg();
 }
 
 function showMode(mode) {
@@ -584,6 +619,7 @@ function showMode(mode) {
 
   if (showingOriginal) {
     ctx.drawImage(origCanvas, 0, 0, canvas.width, canvas.height);
+    syncImg();
   } else {
     renderImage();
   }
@@ -613,7 +649,9 @@ document.getElementById('file-input').addEventListener('change', (e) => {
       document.getElementById('upload-zone').style.display = 'none';
       const wrap = document.getElementById('canvas-wrap');
       wrap.classList.add('visible');
+      canvasImg.style.display = 'block';
       document.getElementById('img-actions').classList.add('visible');
+      document.getElementById('save-hint').classList.add('visible');
 
       document.getElementById('img-size').textContent = `${img.width} × ${img.height}`;
       document.getElementById('status-dot').classList.add('active');
@@ -664,6 +702,9 @@ function removeImage() {
 
   document.getElementById('canvas-wrap').classList.remove('visible');
   document.getElementById('img-actions').classList.remove('visible');
+  document.getElementById('save-hint').classList.remove('visible');
+  canvasImg.style.display = 'none';
+  canvasImg.src = '';
   document.getElementById('upload-zone').style.display = '';
   document.getElementById('img-size').textContent = '';
   document.getElementById('status-dot').classList.remove('active');
