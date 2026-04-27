@@ -34,10 +34,11 @@ body {
   padding: 24px 14px 80px;
 }
 
-/* HEADER */
 .header {
   text-align: center;
   margin-bottom: 24px;
+  width: 100%;
+  max-width: 500px;
 }
 .header-tag {
   font-size: 9px;
@@ -48,41 +49,32 @@ body {
 }
 .header h1 {
   font-family: 'Playfair Display', serif;
-  font-size: clamp(24px, 4vw, 34px);
+  font-size: clamp(22px, 4vw, 32px);
   font-weight: 400;
-  letter-spacing: 0.02em;
   color: var(--text);
 }
 .header h1 em { color: var(--blue-light); font-style: italic; }
 
-/* MAIN LAYOUT - mobile first, single column */
 .app {
   width: 100%;
   max-width: 500px;
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 14px;
 }
-
-/* On wide screens, go 2-col */
 @media (min-width: 700px) {
-  .app {
-    max-width: 860px;
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-  }
+  .app { max-width: 860px; }
+  .app-cols { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
 }
 
-/* PANEL */
 .panel {
   background: var(--surface);
   border: 1px solid var(--border);
   border-radius: 12px;
   overflow: hidden;
 }
-
 .panel-header {
-  padding: 14px 20px;
+  padding: 12px 18px;
   border-bottom: 1px solid var(--border);
   font-size: 9px;
   letter-spacing: 3px;
@@ -92,178 +84,86 @@ body {
   justify-content: space-between;
   align-items: center;
 }
+.panel-header .count { color: var(--blue-light); font-size: 10px; }
 
-/* UPLOAD ZONE */
+/* UPLOAD */
 .upload-zone {
-  margin: 20px;
+  margin: 16px;
   border: 1px dashed var(--border-light);
   border-radius: 8px;
-  height: 200px;
+  min-height: 120px;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 10px;
+  gap: 8px;
   cursor: pointer;
   transition: border-color 0.2s, background 0.2s;
-  position: relative;
-  overflow: hidden;
 }
-.upload-zone:hover {
+.upload-zone:hover, .upload-zone.drag-over {
   border-color: var(--blue);
-  background: rgba(74,127,165,0.04);
+  background: rgba(74,127,165,0.05);
 }
-.upload-zone.has-image {
-  border-style: solid;
-  border-color: var(--blue-dim);
-}
-.upload-icon { font-size: 28px; opacity: 0.5; }
-.upload-text { font-size: 11px; color: var(--text-2); text-align: center; line-height: 1.6; }
+.upload-icon { font-size: 26px; opacity: 0.5; }
+.upload-text { font-size: 11px; color: var(--text-2); text-align: center; line-height: 1.7; }
 .upload-text span { color: var(--blue-light); }
 #file-input { display: none; }
 
-.canvas-wrap {
-  margin: 20px;
-  border-radius: 8px;
+/* PHOTO GRID */
+.photos-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 3px;
+  margin: 0 16px 16px;
+}
+.photo-item {
+  position: relative;
+  aspect-ratio: 1;
+  border-radius: 4px;
   overflow: hidden;
   background: #0a0c10;
-  display: none;
-  position: relative;
-}
-.canvas-wrap.visible { display: block; }
-canvas {
-  width: 100%;
-  height: auto;
-  display: block;
-}
-
-/* PRESET SELECTOR */
-.presets {
-  padding: 16px 20px;
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 8px;
-}
-
-.preset-btn {
-  padding: 12px 14px;
-  background: var(--surface2);
-  border: 1px solid var(--border);
-  border-radius: 8px;
   cursor: pointer;
-  text-align: left;
-  transition: border-color 0.2s, background 0.2s;
-  min-height: 56px;
+  border: 2px solid transparent;
+  transition: border-color 0.2s;
 }
-.preset-btn:hover { border-color: var(--blue-dim); }
-.preset-btn.active {
-  border-color: var(--blue);
-  background: rgba(74,127,165,0.08);
-}
-.preset-name {
-  font-size: 13px;
-  color: var(--text);
-  margin-bottom: 4px;
-  font-family: 'Playfair Display', serif;
-}
-.preset-desc {
-  font-size: 10px;
-  color: var(--text-3);
-  letter-spacing: 0.5px;
-}
-
-/* SLIDERS */
-.sliders {
-  padding: 16px 20px;
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-}
-
-.slider-row {
+.photo-item.selected { border-color: var(--blue); }
+.photo-item img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.photo-item .remove-btn {
+  position: absolute;
+  top: 4px; right: 4px;
+  width: 22px; height: 22px;
+  background: rgba(0,0,0,0.75);
+  border: none;
+  border-radius: 50%;
+  color: #fff;
+  font-size: 11px;
+  cursor: pointer;
   display: flex;
   align-items: center;
-  gap: 10px;
-  min-height: 36px;
+  justify-content: center;
 }
-.slider-label {
-  width: 52px;
-  font-size: 11px;
-  color: var(--text-2);
-  letter-spacing: 1px;
-  flex-shrink: 0;
-}
-.slider-input {
-  flex: 1;
-  -webkit-appearance: none;
-  appearance: none;
-  height: 3px;
-  background: var(--border-light);
-  border-radius: 2px;
-  outline: none;
+.add-more-cell {
+  aspect-ratio: 1;
+  border-radius: 4px;
+  border: 1px dashed var(--border-light);
+  display: flex;
+  align-items: center;
+  justify-content: center;
   cursor: pointer;
-  min-width: 0;
+  font-size: 22px;
+  opacity: 0.4;
+  transition: opacity 0.2s, border-color 0.2s;
 }
-.slider-input::-webkit-slider-thumb {
-  -webkit-appearance: none;
-  width: 22px;
-  height: 22px;
-  border-radius: 50%;
-  background: var(--blue);
-  cursor: pointer;
-  border: 3px solid var(--bg);
-  box-shadow: 0 0 0 1px var(--blue);
-}
-.slider-input::-moz-range-thumb {
-  width: 22px;
-  height: 22px;
-  border-radius: 50%;
-  background: var(--blue);
-  cursor: pointer;
-  border: 3px solid var(--bg);
-}
-.slider-val {
-  width: 32px;
-  font-size: 10px;
-  color: var(--blue-light);
-  text-align: right;
-  flex-shrink: 0;
-}
+.add-more-cell:hover { opacity: 1; border-color: var(--blue); }
 
-/* DOWNLOAD BUTTON */
-.btn-download {
-  display: block;
-  width: calc(100% - 40px);
-  margin: 0 20px 20px;
-  padding: 16px;
-  background: var(--blue);
-  color: #fff;
-  border: none;
-  border-radius: 8px;
-  font-family: 'DM Mono', monospace;
-  font-size: 12px;
-  letter-spacing: 3px;
-  text-transform: uppercase;
-  cursor: pointer;
-  transition: background 0.2s, transform 0.1s;
-}
-.btn-download:hover { background: var(--blue-light); color: var(--bg); }
-.btn-download:active { transform: scale(0.98); }
-.btn-download:disabled {
-  background: var(--surface2);
-  color: var(--text-3);
-  cursor: not-allowed;
-}
-
-/* BEFORE/AFTER TOGGLE */
+/* PREVIEW */
 .toggle-wrap {
   display: flex;
-  gap: 0;
-  margin: 16px 20px 0;
+  margin: 12px 16px 0;
 }
 .toggle-btn {
   flex: 1;
-  padding: 12px 8px;
+  padding: 11px 8px;
   font-family: 'DM Mono', monospace;
   font-size: 11px;
   letter-spacing: 2px;
@@ -279,88 +179,113 @@ canvas {
 .toggle-btn:last-child { border-radius: 0 4px 4px 0; border-left: none; }
 .toggle-btn.active { background: var(--surface); color: var(--blue-light); border-color: var(--blue-dim); }
 
-/* STATUS */
-.status-bar {
-  padding: 10px 20px;
+.preview-wrap {
+  margin: 10px 16px 0;
+  border-radius: 8px;
+  overflow: hidden;
+  background: #0a0c10;
+  display: none;
+}
+.preview-wrap.visible { display: block; }
+.preview-wrap img { width: 100%; height: auto; display: block; }
+
+.save-hint {
+  display: none;
+  align-items: center;
+  gap: 10px;
+  margin: 10px 16px 0;
+  padding: 11px 14px;
+  background: rgba(74,127,165,0.07);
+  border: 1px solid var(--blue-dim);
+  border-radius: 8px;
+}
+.save-hint.visible { display: flex; }
+.save-hint-icon { font-size: 18px; flex-shrink: 0; }
+.save-hint-text { font-size: 10px; color: var(--text-2); line-height: 1.7; }
+.save-hint-text span { color: var(--text-3); font-size: 9px; }
+
+.count-bar {
+  padding: 10px 18px;
   font-size: 9px;
   color: var(--text-3);
   letter-spacing: 1px;
   border-top: 1px solid var(--border);
   display: flex;
   justify-content: space-between;
-}
-.status-dot {
-  display: inline-block;
-  width: 6px; height: 6px;
-  border-radius: 50%;
-  background: var(--text-3);
-  margin-right: 6px;
-  vertical-align: middle;
-}
-.status-dot.active { background: var(--blue); box-shadow: 0 0 6px var(--blue); }
-
-/* FULL WIDTH BOTTOM PANEL */
-.full-panel {
-  grid-column: 1 / -1;
+  margin-top: 10px;
 }
 
-/* CHANGE / REMOVE BUTTONS */
-.img-actions {
-  display: none;
+/* PRESETS */
+.presets {
+  padding: 14px 16px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
   gap: 8px;
-  margin: 0 20px 12px;
 }
-.img-actions.visible { display: flex; }
-
-.btn-img-action {
-  flex: 1;
-  padding: 12px 10px;
-  font-family: 'DM Mono', monospace;
-  font-size: 11px;
-  letter-spacing: 2px;
-  text-transform: uppercase;
-  border-radius: 6px;
-  cursor: pointer;
-  transition: all 0.2s;
+.preset-btn {
+  padding: 12px 12px;
+  background: var(--surface2);
   border: 1px solid var(--border);
-  min-height: 44px;
-}
-.btn-change {
-  background: var(--surface2);
-  color: var(--blue-light);
-  border-color: var(--blue-dim);
-}
-.btn-change:hover { background: var(--blue-dim); }
-.btn-remove {
-  background: var(--surface2);
-  color: #a06060;
-  border-color: #4a2a2a;
-}
-.btn-remove:hover { background: #2e1a1a; border-color: #7a3a3a; }
-
-/* SAVE HINT */
-.save-hint {
-  display: none;
-  align-items: center;
-  gap: 12px;
-  margin: 0 20px 12px;
-  padding: 12px 14px;
-  background: rgba(74,127,165,0.08);
-  border: 1px solid var(--blue-dim);
   border-radius: 8px;
+  cursor: pointer;
+  text-align: left;
+  transition: border-color 0.2s, background 0.2s;
+  min-height: 54px;
 }
-.save-hint.visible { display: flex; }
-.save-hint-icon { font-size: 20px; flex-shrink: 0; }
-.save-hint-text { font-size: 11px; color: var(--text-2); line-height: 1.7; }
-.save-hint-text span { color: var(--text-3); font-size: 10px; }
+.preset-btn.active { border-color: var(--blue); background: rgba(74,127,165,0.08); }
+.preset-name { font-size: 13px; color: var(--text); margin-bottom: 3px; font-family: 'Playfair Display', serif; }
+.preset-desc { font-size: 9px; color: var(--text-3); letter-spacing: 0.5px; }
 
-/* Make canvas show as img so long-press works on iOS */
-#canvas-img {
-  width: 100%;
-  height: auto;
-  display: block;
-  border-radius: 0;
+/* SLIDERS */
+.sliders {
+  padding: 4px 16px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
 }
+.slider-row { display: flex; align-items: center; gap: 10px; min-height: 36px; }
+.slider-label { width: 52px; font-size: 11px; color: var(--text-2); letter-spacing: 1px; flex-shrink: 0; }
+.slider-input {
+  flex: 1; -webkit-appearance: none; appearance: none;
+  height: 3px; background: var(--border-light); border-radius: 2px;
+  outline: none; cursor: pointer; min-width: 0;
+}
+.slider-input::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 22px; height: 22px; border-radius: 50%;
+  background: var(--blue); cursor: pointer;
+  border: 3px solid var(--bg); box-shadow: 0 0 0 1px var(--blue);
+}
+.slider-input::-moz-range-thumb {
+  width: 22px; height: 22px; border-radius: 50%;
+  background: var(--blue); cursor: pointer; border: 3px solid var(--bg);
+}
+.slider-val { width: 32px; font-size: 10px; color: var(--blue-light); text-align: right; flex-shrink: 0; }
+
+/* BUTTONS */
+.btn-primary {
+  display: block; width: calc(100% - 32px); margin: 0 16px 10px;
+  padding: 15px; background: var(--blue); color: #fff; border: none;
+  border-radius: 8px; font-family: 'DM Mono', monospace; font-size: 12px;
+  letter-spacing: 3px; text-transform: uppercase; cursor: pointer;
+  transition: background 0.2s, transform 0.1s;
+}
+.btn-primary:hover { background: var(--blue-light); color: var(--bg); }
+.btn-primary:active { transform: scale(0.98); }
+.btn-primary:disabled { background: var(--surface2); color: var(--text-3); cursor: not-allowed; }
+
+.btn-secondary {
+  display: block; width: calc(100% - 32px); margin: 0 16px 16px;
+  padding: 13px; background: transparent; color: var(--text-2);
+  border: 1px solid var(--border); border-radius: 8px;
+  font-family: 'DM Mono', monospace; font-size: 11px;
+  letter-spacing: 2px; text-transform: uppercase; cursor: pointer;
+  transition: all 0.2s;
+}
+.btn-secondary:hover { border-color: var(--blue-dim); color: var(--blue-light); }
+.btn-secondary:disabled { opacity: 0.3; cursor: not-allowed; }
+
+canvas { display: none; }
 </style>
 </head>
 <body>
@@ -371,151 +296,138 @@ canvas {
 </div>
 
 <div class="app">
+  <div class="app-cols">
 
-  <!-- LEFT: UPLOAD + PREVIEW -->
-  <div class="panel">
-    <div class="panel-header">
-      <span>預覽</span>
-      <span id="img-size"></span>
+    <!-- LEFT: PHOTOS -->
+    <div class="panel">
+      <div class="panel-header">
+        <span>照片</span>
+        <span class="count" id="count-label">0 張</span>
+      </div>
+
+      <div class="upload-zone" id="upload-zone" onclick="document.getElementById('file-input').click()">
+        <div class="upload-icon">🌊</div>
+        <div class="upload-text">點擊選取照片<br><span>可一次選多張</span></div>
+      </div>
+      <input type="file" id="file-input" accept="image/*" multiple>
+
+      <div class="photos-grid" id="photos-grid" style="display:none"></div>
+
+      <div class="toggle-wrap" id="toggle-wrap" style="display:none">
+        <button class="toggle-btn active" id="btn-after" onclick="showMode('after')">套用後</button>
+        <button class="toggle-btn" id="btn-before" onclick="showMode('before')">原圖</button>
+      </div>
+
+      <div class="preview-wrap" id="preview-wrap">
+        <img id="preview-img" alt="預覽">
+      </div>
+
+      <div class="save-hint" id="save-hint">
+        <div class="save-hint-icon">👆</div>
+        <div class="save-hint-text">長按上方圖片儲存到相簿<br><span>iPhone 選「加入照片」· Android 選「儲存圖片」</span></div>
+      </div>
+
+      <div class="count-bar" id="count-bar" style="display:none">
+        <span id="status-text">選取一張照片預覽</span>
+        <span id="selected-label"></span>
+      </div>
     </div>
 
-    <div class="toggle-wrap">
-      <button class="toggle-btn active" id="btn-after" onclick="showMode('after')">套用後</button>
-      <button class="toggle-btn" id="btn-before" onclick="showMode('before')">原圖</button>
+    <!-- RIGHT: CONTROLS -->
+    <div class="panel">
+      <div class="panel-header"><span>風格預設</span></div>
+      <div class="presets">
+        <button class="preset-btn active" onclick="applyPreset('ocean', this)">
+          <div class="preset-name">石青</div>
+          <div class="preset-desc">冷調 · 自然紋理 · 推薦</div>
+        </button>
+        <button class="preset-btn" onclick="applyPreset('steel', this)">
+          <div class="preset-name">礦霧</div>
+          <div class="preset-desc">偏冷 · 低飽和 · 清透</div>
+        </button>
+        <button class="preset-btn" onclick="applyPreset('shore', this)">
+          <div class="preset-name">海鹽</div>
+          <div class="preset-desc">明亮 · 藍白感 · 清爽</div>
+        </button>
+        <button class="preset-btn" onclick="applyPreset('abyss', this)">
+          <div class="preset-name">深礦</div>
+          <div class="preset-desc">強對比 · 釉面突出</div>
+        </button>
+      </div>
+
+      <div class="panel-header"><span>手動微調</span></div>
+      <div class="sliders">
+        <div class="slider-row">
+          <span class="slider-label">亮度</span>
+          <input type="range" class="slider-input" id="s-brightness" min="-100" max="100" value="0" oninput="onSlider()">
+          <span class="slider-val" id="v-brightness">0</span>
+        </div>
+        <div class="slider-row">
+          <span class="slider-label">對比</span>
+          <input type="range" class="slider-input" id="s-contrast" min="-100" max="100" value="0" oninput="onSlider()">
+          <span class="slider-val" id="v-contrast">0</span>
+        </div>
+        <div class="slider-row">
+          <span class="slider-label">飽和度</span>
+          <input type="range" class="slider-input" id="s-saturation" min="-100" max="100" value="0" oninput="onSlider()">
+          <span class="slider-val" id="v-saturation">0</span>
+        </div>
+        <div class="slider-row">
+          <span class="slider-label">色溫</span>
+          <input type="range" class="slider-input" id="s-temp" min="-100" max="100" value="0" oninput="onSlider()">
+          <span class="slider-val" id="v-temp">0</span>
+        </div>
+        <div class="slider-row">
+          <span class="slider-label">暗角</span>
+          <input type="range" class="slider-input" id="s-vignette" min="0" max="100" value="0" oninput="onSlider()">
+          <span class="slider-val" id="v-vignette">0</span>
+        </div>
+        <div class="slider-row">
+          <span class="slider-label">藍移</span>
+          <input type="range" class="slider-input" id="s-blue" min="0" max="100" value="0" oninput="onSlider()">
+          <span class="slider-val" id="v-blue">0</span>
+        </div>
+      </div>
+
+      <button class="btn-primary" id="btn-dl-selected" onclick="downloadSelected()" disabled>↓ 下載選取照片</button>
+      <button class="btn-secondary" id="btn-dl-all" onclick="downloadAll()" disabled>↓ 下載全部（逐張）</button>
     </div>
 
-    <div class="upload-zone" id="upload-zone" onclick="document.getElementById('file-input').click()">
-      <div class="upload-icon">🌊</div>
-      <div class="upload-text">點擊上傳照片<br><span>JPG / PNG / WEBP</span></div>
-      <input type="file" id="file-input" accept="image/*">
-    </div>
-
-    <div class="canvas-wrap" id="canvas-wrap">
-      <canvas id="canvas" style="display:none"></canvas>
-      <img id="canvas-img" alt="調色後預覽" style="display:none;">
-    </div>
-
-    <div class="img-actions" id="img-actions">
-      <button class="btn-img-action btn-change" onclick="document.getElementById('file-input').click()">↺ 更換照片</button>
-      <button class="btn-img-action btn-remove" onclick="removeImage()">✕ 移除</button>
-    </div>
-
-    <div class="status-bar">
-      <span><span class="status-dot" id="status-dot"></span><span id="status-text">等待上傳</span></span>
-      <span id="preset-label">—</span>
-    </div>
   </div>
-
-  <!-- RIGHT: CONTROLS -->
-  <div class="panel">
-    <div class="panel-header"><span>風格預設</span></div>
-    <div class="presets">
-      <button class="preset-btn active" onclick="applyPreset('ocean')">
-        <div class="preset-name">石青</div>
-        <div class="preset-desc">冷調 · 自然紋理 · 推薦</div>
-      </button>
-      <button class="preset-btn" onclick="applyPreset('steel')">
-        <div class="preset-name">礦霧</div>
-        <div class="preset-desc">偏冷 · 低飽和 · 清透</div>
-      </button>
-      <button class="preset-btn" onclick="applyPreset('shore')">
-        <div class="preset-name">海鹽</div>
-        <div class="preset-desc">明亮 · 藍白感 · 清爽</div>
-      </button>
-      <button class="preset-btn" onclick="applyPreset('abyss')">
-        <div class="preset-name">深礦</div>
-        <div class="preset-desc">強對比 · 釉面突出</div>
-      </button>
-    </div>
-
-    <div class="panel-header" style="margin-top:4px;"><span>手動微調</span></div>
-    <div class="sliders">
-      <div class="slider-row">
-        <span class="slider-label">亮度</span>
-        <input type="range" class="slider-input" id="s-brightness" min="-100" max="100" value="0" oninput="onSlider()">
-        <span class="slider-val" id="v-brightness">0</span>
-      </div>
-      <div class="slider-row">
-        <span class="slider-label">對比</span>
-        <input type="range" class="slider-input" id="s-contrast" min="-100" max="100" value="0" oninput="onSlider()">
-        <span class="slider-val" id="v-contrast">0</span>
-      </div>
-      <div class="slider-row">
-        <span class="slider-label">飽和度</span>
-        <input type="range" class="slider-input" id="s-saturation" min="-100" max="100" value="0" oninput="onSlider()">
-        <span class="slider-val" id="v-saturation">0</span>
-      </div>
-      <div class="slider-row">
-        <span class="slider-label">色溫</span>
-        <input type="range" class="slider-input" id="s-temp" min="-100" max="100" value="0" oninput="onSlider()">
-        <span class="slider-val" id="v-temp">0</span>
-      </div>
-      <div class="slider-row">
-        <span class="slider-label">暗角</span>
-        <input type="range" class="slider-input" id="s-vignette" min="0" max="100" value="0" oninput="onSlider()">
-        <span class="slider-val" id="v-vignette">0</span>
-      </div>
-      <div class="slider-row">
-        <span class="slider-label">藍移</span>
-        <input type="range" class="slider-input" id="s-blue" min="0" max="100" value="0" oninput="onSlider()">
-        <span class="slider-val" id="v-blue">0</span>
-      </div>
-    </div>
-
-    <div class="save-hint" id="save-hint">
-      <div class="save-hint-icon">👆</div>
-      <div class="save-hint-text">長按上方圖片儲存到相簿<br><span>iPhone: 選「加入照片」｜Android: 選「儲存圖片」</span></div>
-    </div>
-    <button class="btn-download" id="btn-dl" onclick="downloadImage()" disabled>↓ 下載到裝置（備用）</button>
-  </div>
-
 </div>
 
-<!-- Hidden original canvas -->
-<canvas id="canvas-orig" style="display:none"></canvas>
+<canvas id="work-canvas"></canvas>
 
 <script>
-const canvas = document.getElementById('canvas');
-const ctx = canvas.getContext('2d');
-const origCanvas = document.getElementById('canvas-orig');
-const origCtx = origCanvas.getContext('2d');
-const canvasImg = document.getElementById('canvas-img');
+const workCanvas = document.getElementById('work-canvas');
+const wCtx = workCanvas.getContext('2d');
 
-let originalImage = null;
+let photos = [];
+let selectedIdx = -1;
 let showingOriginal = false;
-let currentPreset = 'ocean';
-
-function syncImg() {
-  canvasImg.src = canvas.toDataURL('image/jpeg', 0.92);
-}
 
 const PRESETS = {
-  ocean:  { brightness: 0,   contrast: 12,  saturation: -10, temp: -18, vignette: 0,  blue: 18 },
-  steel:  { brightness: -5,  contrast: 16,  saturation: -15, temp: -22, vignette: 0,  blue: 12 },
-  shore:  { brightness: 5,   contrast: 8,   saturation: -8,  temp: -14, vignette: 0,  blue: 22 },
-  abyss:  { brightness: -10, contrast: 20,  saturation: -18, temp: -20, vignette: 20, blue: 25 },
+  ocean: { brightness: 0,   contrast: 12, saturation: -10, temp: -18, vignette: 0,  blue: 18 },
+  steel: { brightness: -5,  contrast: 16, saturation: -15, temp: -22, vignette: 0,  blue: 12 },
+  shore: { brightness: 5,   contrast: 8,  saturation: -8,  temp: -14, vignette: 0,  blue: 22 },
+  abyss: { brightness: -10, contrast: 20, saturation: -18, temp: -20, vignette: 20, blue: 25 },
 };
 
-function applyPreset(name) {
-  currentPreset = name;
+function applyPreset(name, btn) {
   const p = PRESETS[name];
   setSlider('brightness', p.brightness);
-  setSlider('contrast', p.contrast);
+  setSlider('contrast',   p.contrast);
   setSlider('saturation', p.saturation);
-  setSlider('temp', p.temp);
-  setSlider('vignette', p.vignette);
-  setSlider('blue', p.blue);
-
+  setSlider('temp',       p.temp);
+  setSlider('vignette',   p.vignette);
+  setSlider('blue',       p.blue);
   document.querySelectorAll('.preset-btn').forEach(b => b.classList.remove('active'));
-  event.currentTarget.classList.add('active');
-  document.getElementById('preset-label').textContent = event.currentTarget.querySelector('.preset-name').textContent;
-
-  if (originalImage) renderImage();
+  btn.classList.add('active');
+  reprocessAll();
 }
 
 function setSlider(id, val) {
-  const el = document.getElementById('s-' + id);
-  el.value = val;
+  document.getElementById('s-' + id).value = val;
   document.getElementById('v-' + id).textContent = val;
 }
 
@@ -523,7 +435,7 @@ function onSlider() {
   ['brightness','contrast','saturation','temp','vignette','blue'].forEach(id => {
     document.getElementById('v-' + id).textContent = document.getElementById('s-' + id).value;
   });
-  if (originalImage) renderImage();
+  reprocessAll();
 }
 
 function getParams() {
@@ -537,202 +449,210 @@ function getParams() {
   };
 }
 
-function renderImage() {
-  if (!originalImage) return;
-  const p = getParams();
+function processImage(img, params) {
+  let w = img.width, h = img.height;
+  const MAX = 1600;
+  if (w > MAX) { h = Math.round(h * MAX / w); w = MAX; }
+  if (h > MAX) { w = Math.round(w * MAX / h); h = MAX; }
+  workCanvas.width = w; workCanvas.height = h;
+  wCtx.drawImage(img, 0, 0, w, h);
 
-  canvas.width = origCanvas.width;
-  canvas.height = origCanvas.height;
-
-  // Draw original
-  ctx.drawImage(origCanvas, 0, 0);
-
-  // Get pixel data
-  const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+  const imageData = wCtx.getImageData(0, 0, w, h);
   const d = imageData.data;
-
-  const bFactor = p.brightness / 100;
-  const cFactor = (100 + p.contrast) / 100;
-  const sFactor = (100 + p.saturation) / 100;
-  const tempShift = p.temp / 100;
-  const blueShift = p.blue / 100;
+  const p = params;
+  const bF = p.brightness / 100;
+  const cF = (100 + p.contrast) / 100;
+  const sF = (100 + p.saturation) / 100;
+  const tS = p.temp / 100;
+  const bS = p.blue / 100;
 
   for (let i = 0; i < d.length; i += 4) {
     let r = d[i], g = d[i+1], b = d[i+2];
-
-    // Brightness
-    r += bFactor * 80; g += bFactor * 80; b += bFactor * 80;
-
-    // Color temperature (cool: reduce red, boost blue)
-    r += tempShift * 40;
-    b -= tempShift * 40;
-
-    // Blue channel boost for deep blue effect
-    b += blueShift * 35;
-    r -= blueShift * 15;
-    g -= blueShift * 8;
-
-    // Contrast (pivot at 128)
-    r = (r - 128) * cFactor + 128;
-    g = (g - 128) * cFactor + 128;
-    b = (b - 128) * cFactor + 128;
-
-    // Saturation
-    const gray = 0.299 * r + 0.587 * g + 0.114 * b;
-    r = gray + (r - gray) * sFactor;
-    g = gray + (g - gray) * sFactor;
-    b = gray + (b - gray) * sFactor;
-
-    d[i]   = Math.min(255, Math.max(0, r));
-    d[i+1] = Math.min(255, Math.max(0, g));
-    d[i+2] = Math.min(255, Math.max(0, b));
+    r += bF*80; g += bF*80; b += bF*80;
+    r += tS*40; b -= tS*40;
+    b += bS*35; r -= bS*15; g -= bS*8;
+    r = (r-128)*cF+128; g = (g-128)*cF+128; b = (b-128)*cF+128;
+    const gray = 0.299*r + 0.587*g + 0.114*b;
+    r = gray+(r-gray)*sF; g = gray+(g-gray)*sF; b = gray+(b-gray)*sF;
+    d[i]   = Math.min(255,Math.max(0,r));
+    d[i+1] = Math.min(255,Math.max(0,g));
+    d[i+2] = Math.min(255,Math.max(0,b));
   }
+  wCtx.putImageData(imageData, 0, 0);
 
-  ctx.putImageData(imageData, 0, 0);
-
-  // Vignette overlay
   if (p.vignette > 0) {
-    const vStrength = p.vignette / 100;
-    const grad = ctx.createRadialGradient(
-      canvas.width/2, canvas.height/2, canvas.width * 0.3,
-      canvas.width/2, canvas.height/2, canvas.width * 0.85
-    );
-    grad.addColorStop(0, 'rgba(0,0,0,0)');
-    grad.addColorStop(1, `rgba(5,10,18,${vStrength * 0.75})`);
-    ctx.fillStyle = grad;
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    const v = p.vignette/100;
+    const grad = wCtx.createRadialGradient(w/2,h/2,w*0.3,w/2,h/2,w*0.85);
+    grad.addColorStop(0,'rgba(0,0,0,0)');
+    grad.addColorStop(1,`rgba(5,10,18,${v*0.75})`);
+    wCtx.fillStyle = grad; wCtx.fillRect(0,0,w,h);
   }
+  if (bS > 0) {
+    wCtx.fillStyle = `rgba(30,60,100,${bS*0.12})`;
+    wCtx.fillRect(0,0,w,h);
+  }
+  return workCanvas.toDataURL('image/jpeg', 0.92);
+}
 
-  // Blue tint overlay
-  if (blueShift > 0) {
-    ctx.fillStyle = `rgba(30,60,100,${blueShift * 0.12})`;
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
-  }
-  syncImg();
+function reprocessAll() {
+  const p = getParams();
+  photos.forEach(photo => {
+    photo.filteredDataUrl = processImage(photo.origImg, p);
+    photo.thumbEl.src = photo.filteredDataUrl;
+  });
+  if (selectedIdx >= 0) updatePreview();
+}
+
+function updatePreview() {
+  if (selectedIdx < 0) return;
+  const photo = photos[selectedIdx];
+  document.getElementById('preview-img').src =
+    showingOriginal ? photo.origImg.src : photo.filteredDataUrl;
+}
+
+function selectPhoto(idx) {
+  if (selectedIdx >= 0 && photos[selectedIdx])
+    photos[selectedIdx].itemEl.classList.remove('selected');
+  selectedIdx = idx;
+  photos[idx].itemEl.classList.add('selected');
+  document.getElementById('preview-wrap').classList.add('visible');
+  document.getElementById('toggle-wrap').style.display = '';
+  document.getElementById('save-hint').classList.add('visible');
+  document.getElementById('selected-label').textContent = `第 ${idx+1} 張`;
+  document.getElementById('btn-dl-selected').disabled = false;
+  showingOriginal = false;
+  document.getElementById('btn-after').classList.add('active');
+  document.getElementById('btn-before').classList.remove('active');
+  updatePreview();
 }
 
 function showMode(mode) {
-  if (!originalImage) return;
+  if (selectedIdx < 0) return;
   showingOriginal = (mode === 'before');
   document.getElementById('btn-after').classList.toggle('active', mode === 'after');
   document.getElementById('btn-before').classList.toggle('active', mode === 'before');
-
-  if (showingOriginal) {
-    ctx.drawImage(origCanvas, 0, 0, canvas.width, canvas.height);
-    syncImg();
-  } else {
-    renderImage();
-  }
+  updatePreview();
 }
 
-// Upload
-document.getElementById('file-input').addEventListener('change', (e) => {
-  const file = e.target.files[0];
-  if (!file) return;
-  const reader = new FileReader();
-  reader.onload = (ev) => {
-    const img = new Image();
-    img.onload = () => {
-      originalImage = img;
+function addPhotos(files) {
+  const p = getParams();
+  Array.from(files).forEach(file => {
+    if (!file.type.startsWith('image/')) return;
+    const reader = new FileReader();
+    reader.onload = ev => {
+      const img = new Image();
+      img.onload = () => {
+        const filteredDataUrl = processImage(img, p);
+        const idx = photos.length;
 
-      // Constrain size
-      let w = img.width, h = img.height;
-      const MAX = 1200;
-      if (w > MAX) { h = h * MAX / w; w = MAX; }
-      if (h > MAX) { w = w * MAX / h; h = MAX; }
-      w = Math.round(w); h = Math.round(h);
+        const item = document.createElement('div');
+        item.className = 'photo-item';
 
-      origCanvas.width = w; origCanvas.height = h;
-      canvas.width = w; canvas.height = h;
-      origCtx.drawImage(img, 0, 0, w, h);
+        const thumb = document.createElement('img');
+        thumb.src = filteredDataUrl;
+        item.appendChild(thumb);
 
-      document.getElementById('upload-zone').style.display = 'none';
-      const wrap = document.getElementById('canvas-wrap');
-      wrap.classList.add('visible');
-      canvasImg.style.display = 'block';
-      document.getElementById('img-actions').classList.add('visible');
-      document.getElementById('save-hint').classList.add('visible');
+        const removeBtn = document.createElement('button');
+        removeBtn.className = 'remove-btn';
+        removeBtn.textContent = '✕';
+        removeBtn.onclick = e => { e.stopPropagation(); removePhoto(photos.indexOf(photo)); };
+        item.appendChild(removeBtn);
 
-      document.getElementById('img-size').textContent = `${img.width} × ${img.height}`;
-      document.getElementById('status-dot').classList.add('active');
-      document.getElementById('status-text').textContent = '已載入';
-      document.getElementById('btn-dl').disabled = false;
+        const photo = { origImg: img, filteredDataUrl, thumbEl: thumb, itemEl: item };
+        item.onclick = () => selectPhoto(photos.indexOf(photo));
+        photos.push(photo);
 
-      // Apply default preset
-      applyPreset_silent(currentPreset);
-      renderImage();
+        renderGrid();
+        updateCountLabel();
+        if (photos.length === 1) selectPhoto(0);
+      };
+      img.src = ev.target.result;
     };
-    img.src = ev.target.result;
-  };
-  reader.readAsDataURL(file);
-});
-
-function applyPreset_silent(name) {
-  const p = PRESETS[name];
-  setSlider('brightness', p.brightness);
-  setSlider('contrast', p.contrast);
-  setSlider('saturation', p.saturation);
-  setSlider('temp', p.temp);
-  setSlider('vignette', p.vignette);
-  setSlider('blue', p.blue);
-  document.getElementById('preset-label').textContent = name.charAt(0).toUpperCase() + name.slice(1);
+    reader.readAsDataURL(file);
+  });
 }
 
-// Drag and drop
-const zone = document.getElementById('upload-zone');
-zone.addEventListener('dragover', (e) => { e.preventDefault(); zone.style.borderColor = 'var(--blue)'; });
-zone.addEventListener('dragleave', () => { zone.style.borderColor = ''; });
-zone.addEventListener('drop', (e) => {
-  e.preventDefault();
-  zone.style.borderColor = '';
-  const file = e.dataTransfer.files[0];
-  if (file && file.type.startsWith('image/')) {
-    const dt = new DataTransfer();
-    dt.items.add(file);
-    document.getElementById('file-input').files = dt.files;
-    document.getElementById('file-input').dispatchEvent(new Event('change'));
+function removePhoto(idx) {
+  if (idx < 0) return;
+  photos.splice(idx, 1);
+  renderGrid();
+  if (selectedIdx === idx) {
+    selectedIdx = -1;
+    document.getElementById('preview-wrap').classList.remove('visible');
+    document.getElementById('save-hint').classList.remove('visible');
+    document.getElementById('toggle-wrap').style.display = 'none';
+    document.getElementById('btn-dl-selected').disabled = true;
+    document.getElementById('selected-label').textContent = '';
+    if (photos.length > 0) selectPhoto(Math.min(idx, photos.length-1));
+  } else if (selectedIdx > idx) {
+    selectedIdx--;
   }
+  updateCountLabel();
+}
+
+function renderGrid() {
+  const grid = document.getElementById('photos-grid');
+  grid.innerHTML = '';
+  photos.forEach((photo, idx) => {
+    grid.appendChild(photo.itemEl);
+    if (idx === selectedIdx) photo.itemEl.classList.add('selected');
+    else photo.itemEl.classList.remove('selected');
+  });
+  const addCell = document.createElement('div');
+  addCell.className = 'add-more-cell';
+  addCell.textContent = '+';
+  addCell.title = '新增照片';
+  addCell.onclick = () => document.getElementById('file-input').click();
+  grid.appendChild(addCell);
+  grid.style.display = photos.length > 0 ? 'grid' : 'none';
+  document.getElementById('upload-zone').style.display = photos.length > 0 ? 'none' : '';
+  document.getElementById('count-bar').style.display = photos.length > 0 ? '' : 'none';
+}
+
+function updateCountLabel() {
+  document.getElementById('count-label').textContent = `${photos.length} 張`;
+  document.getElementById('status-text').textContent =
+    photos.length > 0 ? '點擊縮圖預覽' : '等待上傳';
+  document.getElementById('btn-dl-all').disabled = photos.length === 0;
+}
+
+function downloadSelected() {
+  if (selectedIdx < 0) return;
+  const a = document.createElement('a');
+  a.download = `ig-deepblue-${selectedIdx+1}.jpg`;
+  a.href = photos[selectedIdx].filteredDataUrl;
+  a.click();
+}
+
+async function downloadAll() {
+  for (let i = 0; i < photos.length; i++) {
+    const a = document.createElement('a');
+    a.download = `ig-deepblue-${i+1}.jpg`;
+    a.href = photos[i].filteredDataUrl;
+    a.click();
+    await new Promise(r => setTimeout(r, 500));
+  }
+}
+
+// File input
+document.getElementById('file-input').addEventListener('change', e => {
+  addPhotos(e.target.files);
+  e.target.value = '';
 });
 
-function removeImage() {
-  originalImage = null;
-  showingOriginal = false;
-  ctx.clearRect(0, 0, canvas.width, canvas.height);
-  origCtx.clearRect(0, 0, origCanvas.width, origCanvas.height);
+// Drag & drop
+document.body.addEventListener('dragover', e => { e.preventDefault(); document.getElementById('upload-zone').classList.add('drag-over'); });
+document.body.addEventListener('dragleave', () => document.getElementById('upload-zone').classList.remove('drag-over'));
+document.body.addEventListener('drop', e => {
+  e.preventDefault();
+  document.getElementById('upload-zone').classList.remove('drag-over');
+  if (e.dataTransfer.files.length) addPhotos(e.dataTransfer.files);
+});
 
-  document.getElementById('canvas-wrap').classList.remove('visible');
-  document.getElementById('img-actions').classList.remove('visible');
-  document.getElementById('save-hint').classList.remove('visible');
-  canvasImg.style.display = 'none';
-  canvasImg.src = '';
-  document.getElementById('upload-zone').style.display = '';
-  document.getElementById('img-size').textContent = '';
-  document.getElementById('status-dot').classList.remove('active');
-  document.getElementById('status-text').textContent = '等待上傳';
-  document.getElementById('btn-dl').disabled = true;
-  document.getElementById('file-input').value = '';
-  document.getElementById('btn-after').classList.add('active');
-  document.getElementById('btn-before').classList.remove('active');
-}
-
-function downloadImage() {
-  if (!originalImage) return;
-  // Make sure we render the filtered version
-  if (showingOriginal) renderImage();
-
-  const a = document.createElement('a');
-  a.download = 'ig-deepblue.jpg';
-  a.href = canvas.toDataURL('image/jpeg', 0.92);
-  a.click();
-
-  document.getElementById('status-text').textContent = '已下載！';
-  setTimeout(() => { document.getElementById('status-text').textContent = '就緒'; }, 2000);
-}
-
-// Init preset label
-document.getElementById('preset-label').textContent = '石青';
-applyPreset_silent('ocean');
+// Init sliders
+setSlider('brightness', 0); setSlider('contrast', 12);
+setSlider('saturation', -10); setSlider('temp', -18);
+setSlider('vignette', 0); setSlider('blue', 18);
 </script>
-
 </body>
 </html>
